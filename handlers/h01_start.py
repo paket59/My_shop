@@ -33,5 +33,8 @@ async def register_user(message: Message):
     chat_id = message.chat.id
     full_name = message.from_user.full_name
 
-    #todo реализовать логику с демонстрацией основного меню магазина
-    pass
+    if db_register_user(full_name, chat_id):
+        await message.answer(text='добро пожаловать в магазин')
+        await show_main_menu(message)
+    else:
+        await message.answer(text='для работы нужен ваш номер телефона', reply_markup=phone_button())
