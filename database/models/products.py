@@ -2,6 +2,7 @@ from sqlalchemy import String, DECIMAL, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from .categories import Categories
+from ..base import Base
 
 
 class Products(Base):

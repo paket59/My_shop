@@ -17,13 +17,9 @@ def clean(value: str | None) -> str:
     return "".join(c for c in value if c.isprintable()).strip()
 
 DB_USER = clean(os.getenv("DB_USER"))
-
 DB_PASSWORD = clean(os.getenv("DB_PASSWORD"))
-
 DB_HOST = clean(os.getenv("DB_HOST"))
-
 DB_PORT = clean(os.getenv("DB_PORT"))
-
 DB_NAME = clean(os.getenv("DB_NAME"))
 
 DATABASE_URL = (
