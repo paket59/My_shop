@@ -1,8 +1,9 @@
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from database.base import engine
-from database.models import (Users,Products,Carts,Orders,Categories,FinallyCarts)
+from database.models import (Users, Products, Carts, Orders, Categories, FinallyCarts)
 from sqlalchemy import update, select, func, join
+
 
 def get_session():
     return Session(engine)
@@ -20,6 +21,7 @@ def db_register_user(full_name: str, chat_id: int):
     except IntegrityError:
         return True
 
+
 def db_update_user(chat_id: int, phone: str):
     """получаем номер телефона польльзователя"""
 
@@ -27,6 +29,7 @@ def db_update_user(chat_id: int, phone: str):
         query = update(Users).where(Users.telegram == chat_id).values(phone=phone)
         session.execute(query)
         session.commit()
+
 
 def db_create_user_cart(chat_id: int):
     '''создание корзины пользователя после регистрации'''
@@ -40,11 +43,13 @@ def db_create_user_cart(chat_id: int):
     except IntegrityError:
         return False
 
+
 def db_get_all_category():
     '''получение всех категорий'''
     with get_session() as session:
         query = select(Categories)
         return session.scalars(query).all()
+
 
 def db_get_finally_price(chat_id):
     '''получение итоговой цены'''
