@@ -10,7 +10,7 @@ def get_session():
 
 
 def db_register_user(full_name: str, chat_id: int):
-    """Регистрация юзера в базе"""
+    """Регистрация пользователя в базе"""
 
     try:
         with get_session() as session:
@@ -23,7 +23,7 @@ def db_register_user(full_name: str, chat_id: int):
 
 
 def db_update_user(chat_id: int, phone: str):
-    """получаем номер телефона польльзователя"""
+    """Получаем телефон пользователя из базы данных"""
 
     with get_session() as session:
         query = update(Users).where(Users.telegram == chat_id).values(phone=phone)
@@ -31,8 +31,8 @@ def db_update_user(chat_id: int, phone: str):
         session.commit()
 
 
-def db_create_user_cart(chat_id: int):
-    '''создание корзины пользователя после регистрации'''
+def db_create_user_cart(chat_id):
+    """Создание карзины пользователя после регистрации"""
     try:
         with get_session() as session:
             subquery = session.scalar(select(Users).where(Users.telegram == chat_id))
@@ -45,18 +45,42 @@ def db_create_user_cart(chat_id: int):
 
 
 def db_get_all_category():
-    '''получение всех категорий'''
+    """Получение всех категорий"""
     with get_session() as session:
         query = select(Categories)
         return session.scalars(query).all()
 
+def db_get_total_price(chat_id):
+    """Получение финальной цены"""
 
 def db_get_finally_price(chat_id):
-    '''получение итоговой цены'''
+    """Получение итоговой цены"""
     with get_session() as session:
         query = select(func.sum(FinallyCarts.final_price)).select_from(
-            join(Carts, FinallyCarts, Carts.id == FinallyCarts.cart_id).join(Users, Users.id == Carts.user_id).where(
-                Users.telegram == chat_id)
-
-        )
+            join(Carts, FinallyCarts, Carts.id == FinallyCarts.cart_id)
+            .join(Users, Users.id == Carts.user_id)
+            .where(Users.telegram == chat_id)
+            join(Carts, FinallyCarts, Carts.id == FinallyCarts.cart_id).join(Users,
+Users.id == Carts.user_id).where(
+            Users.telegram == chat_id)
         return session.execute(query).fetchone()[0]
+
+
+def db_get_last_orders(chat_id, limit=10):
+    """Получение истории заказов"""
+    with get_session() as session:
+        query = (
+            select(Orders).
+            join(Carts, Orders.cart_id == Carts.id).
+            join(Users, Users.id == Carts.user_id).
+            where(Users.telegram == chat_id).
+            order_by(Orders.id.desc()).
+            limit(limit)
+        )
+        return session.scalars(query).all()
+
+def db_get_products(cateroty_id):
+    '''Получение продуктов по id категории'''
+    with get_session() as session:
+        query = select(Products).where(Products.category.id == cateroty_id)
+        return session.execute(query).all()

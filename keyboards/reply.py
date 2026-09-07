@@ -14,7 +14,7 @@ def start_keyboard():
 def phone_button():
     """Создание кнопки для номера телефона"""
     builder = ReplyKeyboardBuilder()
-    builder.button(text="Предоставьте номер телефон📞", request_contact = True)
+    builder.button(text="предоставьте номер телефон📞", request_contact = True)
     return builder.as_markup(resize_keyboard=True)
 
 def get_main_menu():
@@ -31,4 +31,10 @@ def back_to_main_menu():
     """Возврат в главное меню"""
     builder = ReplyKeyboardBuilder()
     builder.button(text="Обратно◀")
+    return builder.as_markup(resize_keyboard=True)
+
+def back_arrow_button():
+    """Кнопка назад"""
+    builder = ReplyKeyboardBuilder()
+    builder.button(text="⏮Назад")
     return builder.as_markup(resize_keyboard=True)
