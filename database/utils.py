@@ -2,7 +2,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from database.base import engine
 from database.models import (Users, Products, Carts, Orders, Categories, FinallyCarts)
-from sqlalchemy import update, select, func, join
+from sqlalchemy import update, select, func, join, DECIMAL
 
 
 def get_session():
@@ -50,8 +50,10 @@ def db_get_all_category():
         query = select(Categories)
         return session.scalars(query).all()
 
+
 def db_get_total_price(chat_id):
     """Получение финальной цены"""
+
 
 def db_get_finally_price(chat_id):
     """Получение итоговой цены"""
@@ -60,8 +62,8 @@ def db_get_finally_price(chat_id):
             join(Carts, FinallyCarts, Carts.id == FinallyCarts.cart_id)
             .join(Users, Users.id == Carts.user_id)
             .where(Users.telegram == chat_id)
-            join(Carts, FinallyCarts, Carts.id == FinallyCarts.cart_id).join(Users,
-Users.id == Carts.user_id).where(
+        join(Carts, FinallyCarts, Carts.id == FinallyCarts.cart_id).join(Users,
+                                                                         Users.id == Carts.user_id).where(
             Users.telegram == chat_id)
         return session.execute(query).fetchone()[0]
 
@@ -79,11 +81,13 @@ def db_get_last_orders(chat_id, limit=10):
         )
         return session.scalars(query).all()
 
+
 def db_get_products(cateroty_id):
     '''Получение продуктов по id категории'''
     with get_session() as session:
         query = select(Products).where(Products.category.id == cateroty_id)
         return session.scalars(query).all()
+
 
 def db_get_products_by_id(product_id):
     '''Получение продуктов по id'''
@@ -91,8 +95,61 @@ def db_get_products_by_id(product_id):
         query = select(Products).where(Products.id == product_id)
         return session.scalar(query)
 
+
 def db_get_user_cart(chat_id):
     '''Получение корзины по id'''
     with get_session() as session:
         query = select(Users).join(Users).where(Users.telegram == chat_id)
         return session.scalar(query)
+
+
+def db_add_or_update_item(cart_id: int,
+                          product_id: int,
+                          product_name: int,
+                          product_price: DECIMAL,
+                          increment: int = 0):
+    '''Добавление и изменение товара'''
+    try:
+        with get_session() as session:
+            item = (session.query(FinallyCarts)
+                    .filter.by(cart_id=cart_id, product_id=product_id, )
+                    .first())
+            if item:
+                if increment != 0:
+                    item.quantity = max(1, item.quantity + increment)
+            else:
+                qty = 1 if increment <= 0 else increment
+                item = FinallyCarts(
+                    cart_id=cart_id,
+                    product_id=product_id,
+                    product_name=product_name,
+                    quantity=qty,
+                    final_price=0
+                )
+                session.add(item)
+
+            item.final_price = item.final_price * product_price
+
+            product_sum, total_products = session.query(
+                func.sum(FinallyCarts.final_price), 0),
+            func.sum(FinallyCarts.quantity), 0),
+            ).filter(
+                FinallyCarts.cart_id == cart_id,
+            ).one()
+
+            session.query(Carts).filter(
+                Carts.cart_id == cart_id
+            ).update({
+        Carts.total_price: product_sum,
+        Carts.quantity: total_products,
+        })
+        session.commit()
+        return {
+            'status': 'ok'
+            'total_price': float(product_sum),
+        'total_products': int(total_products),
+        'prouct_quantity': item.quantity,
+        }
+        except Exception as e:
+        print(e)
+        return {'status': 'error'}
