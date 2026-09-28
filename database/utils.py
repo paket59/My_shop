@@ -145,8 +145,8 @@ def db_add_or_update_item(cart_id: int,
         })
         session.commit()
         return {
-            'status': 'ok'
-            'total_price': float(product_sum),
+        'status': 'ok'
+        'total_price': float(product_sum),
         'total_products': int(total_products),
         'prouct_quantity': item.quantity,
         }
