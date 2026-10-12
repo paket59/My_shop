@@ -1,17 +1,48 @@
 from aiogram import Router, F, Bot
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import CallbackQuery, FSInputFile
+from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto, InlineKeyboardMarkup
 
-from database.utils import db_get_product_by_name
+from bot_utils.message_utils import text_for_caption
+from database.utils import db_get_product_by_name, db_get_user_cart, db_add_or_update_item
+from keyboards.inline import quantity_cart_controls
 
 router = Router()
+
 
 @router.callback_query(F.data.regexp(r'action [+-]'))
 async def change_product_quantity(callback: CallbackQuery, bot: Bot):
     """меняем количество продуктов"""
-    chat_id = callback.message.chat.id
+    chat_id = callback.message.id
     message_id = callback.message.message_id
     action = callback.data.split()[-1]
 
     product_name = callback.message.caption.split('\n')[0]
-    product = db_get_product_by_name()
+    product = db_get_product_by_name(product_name)
+    cart = db_get_user_cart(chat_id)
+
+    if not product or not cart:
+        await callback.answer(text="нету товаров", show_alert=True)
+        return
+
+    increment = 1 if action == '+' else -1
+
+    result = db_add_or_update_item(
+        cart_id=cart.cart_id,
+        product_id=product.id,
+        product_name=product.product_name,
+        product_price=product.price,
+        increment=increment)
+
+    if result['status'] == 'error':
+        await callback.answer('ошибка при изменении', show_alert=True)
+        return
+
+    caption = text_for_caption(name=product.product_name, description=product.description,
+                               base_prise=float(product.price) * result['product_quantity'])
+    try:
+        await bot.edit_message_media(chat_id=chat_id, message_id=message_id,
+        medua=InputMediaPhoto(media=FSInputFile(path=product.image), caption=caption,parse_mode='HTML'),
+        reply_markup=quantity_cart_controls(result['product_quantity']))
+    except TelegramBadRequest:
+        pass
+
