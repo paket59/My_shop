@@ -106,7 +106,7 @@ def db_add_or_update_item(
         product_price: DECIMAL,
         increment: int = 0
 ):
-    """добавляет товар или обновляет его количество."""
+    """добавляем товар или обновляем его количество."""
     try:
         with get_session() as session:
             item = (

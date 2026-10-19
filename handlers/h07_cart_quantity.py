@@ -41,7 +41,7 @@ async def change_product_quantity(callback: CallbackQuery, bot: Bot):
                                base_prise=float(product.price) * result['product_quantity'])
     try:
         await bot.edit_message_media(chat_id=chat_id, message_id=message_id,
-        medua=InputMediaPhoto(media=FSInputFile(path=product.image), caption=caption,parse_mode='HTML'),
+        media=InputMediaPhoto(media=FSInputFile(path=product.image), caption=caption,parse_mode='HTML'),
         reply_markup=quantity_cart_controls(result['product_quantity']))
     except TelegramBadRequest:
         pass
