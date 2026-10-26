@@ -13,7 +13,7 @@ def create_category_menu(chat_id):
 
     builder = InlineKeyboardBuilder()
     builder.button(text= f'корзина заказа ({total_price if total_price else 0}₽)',
-                   callback_data='корзин азаказа'
+                   callback_data='корзина заказа'
                   )
     [builder.button(text=category.category_name, callback_data= f'category_{category.id}') for category in categories]
 
@@ -39,3 +39,8 @@ def quantity_cart_controls(quantity : int = 1):
     builder.button(text='⏮', callback_data='from_detail_to_category')
     builder.adjust(3, 2)
     return builder.as_markup(resize_keyboard=True)
+
+    return builder.as_markup(resize_keyboard=True)
+
+def cart_actions_kb():
+    pass

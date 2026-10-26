@@ -23,7 +23,7 @@ def db_register_user(full_name: str, chat_id: int):
 
 
 def db_update_user(chat_id: int, phone: str):
-    """Получаем телефон пользователя из базы данных"""
+    """Получение телефона пользователя из базы данных"""
 
     with get_session() as session:
         query = update(Users).where(Users.telegram == chat_id).values(phone=phone)
@@ -32,7 +32,7 @@ def db_update_user(chat_id: int, phone: str):
 
 
 def db_create_user_cart(chat_id):
-    """Создание карзины пользователя после регистрации"""
+    """Создание корзины пользователя после регистрации"""
     try:
         with get_session() as session:
             subquery = session.scalar(select(Users).where(Users.telegram == chat_id))
@@ -163,3 +163,8 @@ def db_get_product_by_name(product_name):
     with get_session() as session:
         query = select(Products).where(Products.product_name == product_name)
         return session.scalar(query)
+
+    return session.scalars(query)
+
+def db_get_cart_items(chat_id):
+    pass
