@@ -17,15 +17,16 @@ async def open_cart(callback: CallbackQuery):
     await show_cart(chat_id=callback.chat.id, send_fn=callback.answer)
     await callback.answer()
 
-async def show_cart(send_fn: CallbackQuery):
+async def show_cart(chat_id, send_fn):
     '''демонстрация корзины'''
-    cart_items = db_get_cart_items()
+    cart_items = db_get_cart_items(chat_id)
     if not cart_items:
         await send_fn('В корзине пусто')
         return
     text = 'В корзине 🛒'
+    total = 0
     for item in cart_items:
-        total = float(item.price) + total
+        total = float(item['final_price']) + total
         text += f'{item['product_name']} - {item['quantity']} шт - {item['final_price']} руб. \n'
     text += f'цена: {total:.2F} руб \n'
 
