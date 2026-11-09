@@ -165,7 +165,7 @@ def db_get_product_by_name(product_name):
         return session.scalar(query)
 
 def db_get_cart_items(chat_id):
-    '''получем товары из корзины'''
+    '''получем данные товара из корзины'''
     with get_session() as session:
         items = (
             session.query(FinallyCarts)
@@ -183,3 +183,17 @@ def db_get_cart_items(chat_id):
                 'final_price':float(item.final_price)
             })
         return result
+
+def db_get_user_phone(chat_id):
+    '''получаем номер телефора'''
+    with get_session() as session:
+        query = select(Users.phone).where(Users.telegram == chat_id)
+        return session.scalar(query).fetchone()
+
+def db_save_order_history(chat_id):
+    '''сохраняем историю заказов'''
+    pass
+
+def db_clear_final_cart(chat_id):
+    '''чистим конечную корзину'''
+    pass
