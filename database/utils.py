@@ -223,3 +223,18 @@ def db_clear_final_cart(chat_id):
         query = delete(FinallyCarts).where(FinallyCarts.cart_id == cart.id)
         session.execute(query)
         session.commit()
+
+
+def db_get_product_for_delete(chat_id):
+    '''Удаляем товары из корзины'''
+    with(get_session() as session):
+        query = (
+            select(FinallyCarts.id, FinallyCarts.product_name)
+            .join(Carts, FinallyCarts.cart_id == Carts.id)
+            .join(Users, Carts.user_id == Users.id)
+            .where(Users.telegram == chat_id))
+        return session.execute(query).fetchall()
+
+
+def db_increase_product_quantity(cart_id):
+    pass
